@@ -1,0 +1,25 @@
+# YAML demo configuration file
+
+# Database configuration
+database:
+  host: localhost
+  port: 5432
+  username: admin
+  password: password123
+
+# Server configuration
+server:
+  host: 0.0.0.0
+  port: 7999
+  support_proxy: true
+  
+
+# Logging configuration
+logging:
+  level: info
+  file: /var/log/fastProxy/app.log
+
+# Proxy configuration
+proxy:
+  username: admin
+  password: password123
