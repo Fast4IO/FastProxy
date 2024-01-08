@@ -1,8 +1,9 @@
 package common
 
-import "net"
+import (
+	"net"
+)
 
 func CloseConn(conn *net.Conn) {
 	(*conn).Close()
-
 }

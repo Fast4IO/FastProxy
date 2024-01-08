@@ -15,11 +15,6 @@ import (
 	"sync"
 )
 
-type Checker struct {
-	data    sync.Map
-	timeout int
-}
-
 type HTTPRequest struct {
 	HeadBuf     []byte
 	conn        *net.Conn
@@ -37,6 +32,51 @@ type BaseAuth struct {
 	authOkCode  int
 	authTimeout int
 	authRetry   int
+}
+
+type HttpServer struct {
+	Server *net.Listener
+}
+
+func StartHttpServer() {
+	s := &HttpServer{
+		Server: new(net.Listener),
+	}
+	var err error
+	*s.Server, err = net.Listen("tcp", fmt.Sprintf(":%d", config.GlobalConfig.Server.Port))
+	if err != nil {
+		panic(err)
+	}
+	for {
+		var conn net.Conn
+		conn, err = (*s.Server).Accept()
+		if err == nil {
+			go httpCallback(conn)
+
+		} else {
+			conn.Close()
+			break
+		}
+	}
+}
+
+func httpCallback(conn net.Conn) {
+	defer conn.Close()
+	var err interface{}
+	var req *HTTPRequest
+	req, subClient, err := NewHTTPRequest(&conn, 4096, new(BaseAuth))
+
+	if err != nil {
+		conn.Close()
+		return
+	}
+	if !subClient.Ok {
+		conn.Close()
+		return
+	}
+	address := req.Host
+	err = OutToTCP(address, &conn, req)
+	return
 }
 
 func NewHTTPRequest(inConn *net.Conn, bufSize int, basicAuth *BaseAuth) (req *HTTPRequest, client models.User, err error) {
@@ -190,14 +230,11 @@ func (ba *BaseAuth) Check(userpass string) (*models.User, bool) {
 }
 
 func (req *HTTPRequest) addPortIfNot() (newHost string) {
-	//newHost = req.Host
 	port := "80"
 	if req.IsHTTPS() {
 		port = "443"
 	}
 	if (!strings.HasPrefix(req.Host, "[") && strings.Index(req.Host, ":") == -1) || (strings.HasPrefix(req.Host, "[") && strings.HasSuffix(req.Host, "]")) {
-		//newHost = req.Host + ":" + port
-		//req.headBuf = []byte(strings.Replace(string(req.headBuf), req.Host, newHost, 1))
 		req.Host = req.Host + ":" + port
 	}
 	return

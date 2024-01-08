@@ -1,6 +1,7 @@
 package config
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -39,8 +40,13 @@ type ProxyConfig struct {
 }
 
 func init() {
+	configFile := flag.String("c", "", "配置文件路径")
+	// 解析命令行参数
+	flag.Parse()
+
+	fmt.Println("配置文件路径：", *configFile)
 	// Read the conf.yml file
-	file, err := os.Open("conf.yml")
+	file, err := os.Open(*configFile)
 	if err != nil {
 		log.Fatalf("Failed to read conf.yml: %v", err)
 	}

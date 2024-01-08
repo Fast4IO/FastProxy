@@ -1,9 +1,13 @@
 package main
 
 import (
-	"fastProxy/app/helper"
+	"fastProxy/app/config"
+	"fastProxy/app/core"
+	"fmt"
 )
 
 func main() {
-	helper.Start()
+
+	fmt.Printf("程序已运行至：%d 端口\n", config.GlobalConfig.Server.Port)
+	core.Start()
 }

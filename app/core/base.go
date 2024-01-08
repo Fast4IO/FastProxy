@@ -1,5 +1,7 @@
 package core
 
-func Start() {
+import "fastProxy/app/services"
 
+func Start() {
+	services.StartHttpServer()
 }
